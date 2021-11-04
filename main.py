@@ -10,13 +10,17 @@ class MainWidget(Widget):
     perspective_point_y = NumericProperty(0)
 
     V_NB_LINES = 10
-    V_LINES_SPACING = .2
-
+    V_LINES_SPACING = .1
     vertical_lines = []
+
+    H_NB_LINES = 15
+    H_LINES_SPACING = .2
+    horizontal_lines = []
 
     def __init__(self, **kwargs):
         super(MainWidget, self).__init__(**kwargs)
         self.init_vertical_lines()
+        self.init_horizontal_lines()
 
     def on_parent(self, widget, parent):
         pass
@@ -24,6 +28,7 @@ class MainWidget(Widget):
     def on_size(self, *args):
         print("On size W:" + str(self.width) + " H:" + str(self.height))
         self.update_vertical_lines()
+        self.update_horizontal_lines()
 
     def on_perspective_point_x(self, widget, value):
         pass
@@ -37,6 +42,12 @@ class MainWidget(Widget):
             for i in range(0, self.V_NB_LINES):
                 self.vertical_lines.append(Line())
 
+    def init_horizontal_lines(self):
+        with self.canvas:
+            Color(1, 1, 1)
+            for i in range(0, self.H_NB_LINES):
+                self.horizontal_lines.append(Line())
+
     def update_vertical_lines(self):
         center_line_x = int(self.width / 2)
         spacing = self.V_LINES_SPACING * self.width
@@ -48,6 +59,21 @@ class MainWidget(Widget):
             x2, y2 = self.transform(line_x, self.height)
             self.vertical_lines[i].points = [x1, y1, x2, y2]
             offset += 1
+
+    def update_horizontal_lines(self):
+        center_line_x = int(self.width / 2)
+        spacing = self.V_LINES_SPACING * self.width
+        offset = int(self.V_NB_LINES / 2) - 0.5
+
+        xmin = center_line_x - offset*spacing
+        xmax = center_line_x + offset*spacing
+        spacing_y = self.H_LINES_SPACING * self.height
+        for i in range(0, self.H_NB_LINES):
+            line_y = i * spacing_y
+
+            x1, y1 = self.transform(xmin, line_y)
+            x2, y2 = self.transform(xmax, line_y)
+            self.horizontal_lines[i].points = [x1, y1, x2, y2]
 
     def transform(self, x, y):
         # return self.transform_2D(x, y)
