@@ -47,8 +47,8 @@ class MainWidget(Widget):
         self._keyboard.unbind(on_key_up=self.on_keyboard_up)
         self._keyboard = None
 
-    def is_desktop(self):
-        print(platform)
+    @staticmethod
+    def is_desktop():
         return platform in ('linux', 'win', 'macosx')
 
     def on_parent(self, widget, parent):
