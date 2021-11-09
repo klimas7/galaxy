@@ -2,6 +2,8 @@ from kivy.config import Config
 Config.set('graphics', 'width', '900')
 Config.set('graphics', 'height', '400')
 
+from kivy import platform
+from kivy.core.window import Window
 from kivy.app import App
 from kivy.graphics import Line
 from kivy.graphics.context_instructions import Color
@@ -32,7 +34,22 @@ class MainWidget(Widget):
         super(MainWidget, self).__init__(**kwargs)
         self.init_vertical_lines()
         self.init_horizontal_lines()
+
+        if self.is_desktop():
+            self._keyboard = Window.request_keyboard(self.keyboard_closed, self)
+            self._keyboard.bind(on_key_down=self.on_keyboard_down)
+            self._keyboard.bind(on_key_up=self.on_keyboard_up)
+
         Clock.schedule_interval(self.update, 1.0 / 60.0)
+
+    def keyboard_closed(self):
+        self._keyboard.unbind(on_key_down=self.on_keyboard_down)
+        self._keyboard.unbind(on_key_up=self.on_keyboard_up)
+        self._keyboard = None
+
+    def is_desktop(self):
+        print(platform)
+        return platform in ('linux', 'win', 'macosx')
 
     def on_parent(self, widget, parent):
         pass
@@ -108,17 +125,24 @@ class MainWidget(Widget):
 
         return int(tr_x), int(tr_y)
 
+    def on_keyboard_down(self, keyboard, keycode, text, modifiers):
+        if keycode[1] == 'left':
+            self.current_speed_x = self.SPEED_X
+        elif keycode[1] == 'right':
+            self.current_speed_x = -1 * self.SPEED_X
+        return True
+
+    def on_keyboard_up(self, keyboard, keycode):
+        self.current_speed_x = 0
+
     def on_touch_down(self, touch):
         if touch.x < self.width / 2:
             self.current_speed_x = self.SPEED_X
-            print("<-")
         else:
             self.current_speed_x = -1 * self.SPEED_X
-            print("->")
 
     def on_touch_up(self, touch):
         self.current_speed_x = 0
-        print("UP")
 
     def update(self, dt):
         # print("dt: " + str(dt*60))
