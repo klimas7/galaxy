@@ -26,8 +26,9 @@ class MainWidget(Widget):
     H_LINES_SPACING = .1
     horizontal_lines = []
 
-    SPEED = 4
+    SPEED = 1
     current_offset_y = 0
+    current_y_loop = 0
 
     SPEED_X = 12
     current_speed_x = 0
@@ -83,6 +84,7 @@ class MainWidget(Widget):
         return index * spacing_y - self.current_offset_y
 
     def get_tile_coordinates(self, ti_x, ti_y):
+        ti_y = ti_y - self.current_y_loop
         x = self.get_line_x_from_index(ti_x)
         y = self.get_line_y_from_index(ti_y)
         return x, y
@@ -126,11 +128,12 @@ class MainWidget(Widget):
         self.update_vertical_lines()
         self.update_horizontal_lines()
         self.update_tiles()
-        # self.current_offset_y += self.SPEED * time_factor
+        self.current_offset_y += self.SPEED * time_factor
 
         spacing_y = self.H_LINES_SPACING * self.height
         if self.current_offset_y >= spacing_y:
             self.current_offset_y -= spacing_y
+            self.current_y_loop += 1
 
         # self.current_offset_x += self.current_speed_x * time_factor
 
