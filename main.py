@@ -10,7 +10,7 @@ from kivy.app import App
 from kivy.lang import Builder
 from kivy.graphics import Line, Quad, Triangle
 from kivy.graphics.context_instructions import Color
-from kivy.properties import NumericProperty, Clock, ObjectProperty
+from kivy.properties import NumericProperty, Clock, ObjectProperty, StringProperty
 from kivy.uix.relativelayout import RelativeLayout
 
 Builder.load_file("menu.kv")
@@ -21,6 +21,8 @@ class MainWidget(RelativeLayout):
     from user_actions import on_keyboard_down, on_keyboard_up, on_touch_down, on_touch_up, keyboard_closed
 
     menu_widget = ObjectProperty()
+    menu_title = StringProperty("G   A   L   A   X   Y")
+    menu_button_title = StringProperty("START")
     perspective_point_x = NumericProperty(0)
     perspective_point_y = NumericProperty(0)
 
@@ -252,6 +254,8 @@ class MainWidget(RelativeLayout):
 
         if not self.check_ship_collision() and not self.state_game_over:
             self.state_game_over = True
+            self.menu_title = "G  A  M  E     O  V  E  R"
+            self.menu_button_title = "RESTART"
             self.menu_widget.opacity = 1
             print("Game over")
 
