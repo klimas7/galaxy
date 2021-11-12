@@ -7,7 +7,7 @@ Config.set('graphics', 'height', '400')
 from kivy import platform
 from kivy.core.window import Window
 from kivy.app import App
-from kivy.graphics import Line, Quad
+from kivy.graphics import Line, Quad, Triangle
 from kivy.graphics.context_instructions import Color
 from kivy.properties import NumericProperty, Clock
 from kivy.uix.widget import Widget
@@ -20,8 +20,8 @@ class MainWidget(Widget):
     perspective_point_x = NumericProperty(0)
     perspective_point_y = NumericProperty(0)
 
-    V_NB_LINES = 4
-    V_LINES_SPACING = .1
+    V_NB_LINES = 8
+    V_LINES_SPACING = .2
     vertical_lines = []
 
     H_NB_LINES = 15
@@ -40,11 +40,17 @@ class MainWidget(Widget):
     tiles = []
     tiles_coordinates = []
 
+    SHIP_WIDTH = .1
+    SHIP_HEIGHT = 0.035
+    SHIP_BASE_Y = 0.04
+    ship = None
+
     def __init__(self, **kwargs):
         super(MainWidget, self).__init__(**kwargs)
         self.init_vertical_lines()
         self.init_horizontal_lines()
         self.init_tiles()
+        self.init_ship()
         self.pre_fill_tiles_coordination()
         self.generate_tiles_coordinates()
 
@@ -76,6 +82,11 @@ class MainWidget(Widget):
             Color(1, 1, 1)
             for i in range(0, self.NB_TILES):
                 self.tiles.append(Quad())
+
+    def init_ship(self):
+        with self.canvas:
+            Color(0, 0, 0)
+            self.ship = Triangle()
 
     def pre_fill_tiles_coordination(self):
         for i in range(0, 10):
@@ -169,11 +180,24 @@ class MainWidget(Widget):
 
             self.tiles[i].points = [x1, y1, x2, y2, x3, y3, x4, y4]
 
+    def update_ship(self):
+        base_y = self.SHIP_BASE_Y * self.height
+        ship_width = (self.SHIP_WIDTH / 2) * self.width
+
+        tr_x_1, tr_y_1 = (self.perspective_point_x - ship_width, base_y)
+        tr_x_2, tr_y_2 = (self.perspective_point_x, base_y + self.SHIP_HEIGHT*self.height)
+        tr_x_3, tr_y_3 = (self.perspective_point_x + ship_width, base_y)
+        x1, y1 = self.transform(tr_x_1, tr_y_1)
+        x2, y2 = self.transform(tr_x_2, tr_y_2)
+        x3, y3 = self.transform(tr_x_3, tr_y_3)
+        self.ship.points = [x1, y1, x2, y2, x3, y3]
+
     def update(self, dt):
         time_factor = dt*60
         self.update_vertical_lines()
         self.update_horizontal_lines()
         self.update_tiles()
+        self.update_ship()
         self.current_offset_y += self.SPEED * time_factor
 
         spacing_y = self.H_LINES_SPACING * self.height
