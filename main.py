@@ -92,13 +92,13 @@ class MainWidget(RelativeLayout):
 
     def init_horizontal_lines(self):
         with self.canvas:
-            Color(1, 1, 1)
+            Color(1, 1, 1, .95)
             for i in range(0, self.H_NB_LINES):
                 self.horizontal_lines.append(Line())
 
     def init_tiles(self):
         with self.canvas:
-            Color(1, 1, 1)
+            Color(1, 1, 1, .9)
             for i in range(0, self.NB_TILES):
                 self.tiles.append(Quad())
 
