@@ -45,6 +45,7 @@ class MainWidget(Widget):
         self.init_vertical_lines()
         self.init_horizontal_lines()
         self.init_tiles()
+        self.pre_fill_tiles_coordination()
         self.generate_tiles_coordinates()
 
         if self.is_desktop():
@@ -76,12 +77,16 @@ class MainWidget(Widget):
             for i in range(0, self.NB_TILES):
                 self.tiles.append(Quad())
 
+    def pre_fill_tiles_coordination(self):
+        for i in range(0, 10):
+            self.tiles_coordinates.append((0, i))
+
     def generate_tiles_coordinates(self):
         last_x = 0
         last_y = 0
         # clean the coordinate that are out of the screen
         # ti_y < self.current_y_loop
-        for i in range(len(self.tiles_coordinates) - 1, 0, -1):
+        for i in range(len(self.tiles_coordinates) - 1, -1, -1):
             if self.tiles_coordinates[i][1] < self.current_y_loop:
                 del self.tiles_coordinates[i]
 
@@ -90,19 +95,22 @@ class MainWidget(Widget):
             last_x = last_coordinate[0]
             last_y = last_coordinate[1] + 1
 
+        begin_x_index = -int(self.V_NB_LINES / 2) + 1
+        end_x_index = begin_x_index + self.V_NB_LINES - 1
+
         for i in range(len(self.tiles_coordinates), self.NB_TILES):
-            self.tiles_coordinates.append((last_x, last_y))
-            r = random.randint(0, 2)
+            r = random.randint(-1, 1)
+            # -1 -> left
             # 0 -> straight
-            # 1 -> right
-            # 2 -> left
-            if r == 1:
-                last_x += 1
-                self.tiles_coordinates.append((last_x, last_y))
-                last_y += 1
-                self.tiles_coordinates.append((last_x, last_y))
-            if r == 2:
-                last_x -= 1
+            # 1 -> left
+            if last_x >= end_x_index - 1:
+                r = -1
+            if last_x <= begin_x_index:
+                r = 1
+
+            self.tiles_coordinates.append((last_x, last_y))
+            if r != 0:
+                last_x += r
                 self.tiles_coordinates.append((last_x, last_y))
                 last_y += 1
                 self.tiles_coordinates.append((last_x, last_y))
