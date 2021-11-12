@@ -28,7 +28,7 @@ class MainWidget(Widget):
     H_LINES_SPACING = .1
     horizontal_lines = []
 
-    SPEED = 0.1
+    SPEED = .8
     current_offset_y = 0
     current_y_loop = 0
 
@@ -45,6 +45,8 @@ class MainWidget(Widget):
     SHIP_BASE_Y = 0.04
     ship = None
     ship_coordinate = [(0, 0), (0, 0), (0, 0)]
+
+    state_game_over = False
 
     def __init__(self, **kwargs):
         super(MainWidget, self).__init__(**kwargs)
@@ -220,19 +222,22 @@ class MainWidget(Widget):
         self.update_horizontal_lines()
         self.update_tiles()
         self.update_ship()
+
         speed_y = self.SPEED * self.height / 100
-        self.current_offset_y += speed_y * time_factor
+        if not self.state_game_over:
+            self.current_offset_y += speed_y * time_factor
 
-        spacing_y = self.H_LINES_SPACING * self.height
-        if self.current_offset_y >= spacing_y:
-            self.current_offset_y -= spacing_y
-            self.current_y_loop += 1
-            self.generate_tiles_coordinates()
+            spacing_y = self.H_LINES_SPACING * self.height
+            while self.current_offset_y >= spacing_y:
+                self.current_offset_y -= spacing_y
+                self.current_y_loop += 1
+                self.generate_tiles_coordinates()
 
-        speed_x = self.current_speed_x * self.width / 100
-        self.current_offset_x += speed_x * time_factor
+            speed_x = self.current_speed_x * self.width / 100
+            self.current_offset_x += speed_x * time_factor
 
-        if not self.check_ship_collision():
+        if not self.check_ship_collision() and not self.state_game_over:
+            self.state_game_over = True
             print("Game over")
 
 
