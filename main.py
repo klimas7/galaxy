@@ -61,35 +61,41 @@ class MainWidget(Widget):
             for i in range(0, self.H_NB_LINES):
                 self.horizontal_lines.append(Line())
 
-    def update_vertical_lines(self):
-        center_line_x = int(self.width / 2)
+    def get_line_x_from_index(self, index):
+        center_line_x = self.perspective_point_x
         spacing = self.V_LINES_SPACING * self.width
-        offset = -int(self.V_NB_LINES/2) + 0.5
-        for i in range(0, self.V_NB_LINES):
-            line_x = center_line_x + offset*spacing + self.current_offset_x
+        offset = index - 0.5
+        line_x = center_line_x + offset * spacing + self.current_offset_x
+        return line_x
+
+    def get_line_y_from_index(self, index):
+        spacing_y = self.H_LINES_SPACING * self.height
+        return index * spacing_y - self.current_offset_y
+
+    def update_vertical_lines(self):
+        begin_x_index = -int(self.V_NB_LINES/2) + 1
+        end_x_index = begin_x_index + self.V_NB_LINES
+        for i in range(begin_x_index, end_x_index):
+            line_x = self.get_line_x_from_index(i)
 
             x1, y1 = self.transform(line_x, 0)
             x2, y2 = self.transform(line_x, self.height)
             self.vertical_lines[i].points = [x1, y1, x2, y2]
-            offset += 1
 
     def update_horizontal_lines(self):
-        center_line_x = int(self.width / 2)
-        spacing = self.V_LINES_SPACING * self.width
-        offset = int(self.V_NB_LINES / 2) - 0.5
+        begin_x_index = -int(self.V_NB_LINES / 2) + 1
+        end_x_index = begin_x_index + self.V_NB_LINES - 1
 
-        xmin = center_line_x - offset*spacing + self.current_offset_x
-        xmax = center_line_x + offset*spacing + self.current_offset_x
-        spacing_y = self.H_LINES_SPACING * self.height
+        xmin = self.get_line_x_from_index(begin_x_index)
+        xmax = self.get_line_x_from_index(end_x_index)
         for i in range(0, self.H_NB_LINES):
-            line_y = i * spacing_y - self.current_offset_y
+            line_y = self.get_line_y_from_index(i)
 
             x1, y1 = self.transform(xmin, line_y)
             x2, y2 = self.transform(xmax, line_y)
             self.horizontal_lines[i].points = [x1, y1, x2, y2]
 
     def update(self, dt):
-        # print("dt: " + str(dt*60))
         time_factor = dt*60
         self.update_vertical_lines()
         self.update_horizontal_lines()
