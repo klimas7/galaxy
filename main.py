@@ -7,13 +7,15 @@ Config.set('graphics', 'height', '400')
 from kivy import platform
 from kivy.core.window import Window
 from kivy.app import App
+from kivy.lang import Builder
 from kivy.graphics import Line, Quad, Triangle
 from kivy.graphics.context_instructions import Color
 from kivy.properties import NumericProperty, Clock
-from kivy.uix.widget import Widget
+from kivy.uix.relativelayout import RelativeLayout
 
+Builder.load_file("menu.kv")
 
-class MainWidget(Widget):
+class MainWidget(RelativeLayout):
     from transforms import transform, transform_2D, transform_perspective
     from user_actions import on_keyboard_down, on_keyboard_up, on_touch_down, on_touch_up, keyboard_closed
 
