@@ -1,3 +1,5 @@
+import random
+
 from kivy.config import Config
 Config.set('graphics', 'width', '900')
 Config.set('graphics', 'height', '400')
@@ -18,15 +20,15 @@ class MainWidget(Widget):
     perspective_point_x = NumericProperty(0)
     perspective_point_y = NumericProperty(0)
 
-    V_NB_LINES = 10
-    V_LINES_SPACING = .25
+    V_NB_LINES = 4
+    V_LINES_SPACING = .1
     vertical_lines = []
 
     H_NB_LINES = 15
     H_LINES_SPACING = .1
     horizontal_lines = []
 
-    SPEED = 1
+    SPEED = 4
     current_offset_y = 0
     current_y_loop = 0
 
@@ -34,7 +36,7 @@ class MainWidget(Widget):
     current_speed_x = 0
     current_offset_x = 0
 
-    NB_TILES = 4
+    NB_TILES = 16
     tiles = []
     tiles_coordinates = []
 
@@ -75,6 +77,7 @@ class MainWidget(Widget):
                 self.tiles.append(Quad())
 
     def generate_tiles_coordinates(self):
+        last_x = 0
         last_y = 0
         # clean the coordinate that are out of the screen
         # ti_y < self.current_y_loop
@@ -83,10 +86,26 @@ class MainWidget(Widget):
                 del self.tiles_coordinates[i]
 
         if len(self.tiles_coordinates) > 0:
-            last_y = self.tiles_coordinates[-1][1] + 1
+            last_coordinate = self.tiles_coordinates[-1]
+            last_x = last_coordinate[0]
+            last_y = last_coordinate[1] + 1
 
         for i in range(len(self.tiles_coordinates), self.NB_TILES):
-            self.tiles_coordinates.append((0, last_y))
+            self.tiles_coordinates.append((last_x, last_y))
+            r = random.randint(0, 2)
+            # 0 -> straight
+            # 1 -> right
+            # 2 -> left
+            if r == 1:
+                last_x += 1
+                self.tiles_coordinates.append((last_x, last_y))
+                last_y += 1
+                self.tiles_coordinates.append((last_x, last_y))
+            if r == 2:
+                last_x -= 1
+                self.tiles_coordinates.append((last_x, last_y))
+                last_y += 1
+                self.tiles_coordinates.append((last_x, last_y))
             last_y += 1
 
     def get_line_x_from_index(self, index):
@@ -155,7 +174,7 @@ class MainWidget(Widget):
             self.current_y_loop += 1
             self.generate_tiles_coordinates()
 
-        # self.current_offset_x += self.current_speed_x * time_factor
+        self.current_offset_x += self.current_speed_x * time_factor
 
 
 class GalaxyApp(App):
