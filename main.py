@@ -23,6 +23,7 @@ class MainWidget(RelativeLayout):
     menu_widget = ObjectProperty()
     menu_title = StringProperty("G   A   L   A   X   Y")
     menu_button_title = StringProperty("START")
+    score_txt = StringProperty("SCORE: 0")
     perspective_point_x = NumericProperty(0)
     perspective_point_y = NumericProperty(0)
 
@@ -76,6 +77,7 @@ class MainWidget(RelativeLayout):
         self.current_speed_x = 0
         self.current_offset_x = 0
         self.tiles_coordinates = []
+        self.score_txt = "SCORE: " + str(self.current_y_loop)
         self.pre_fill_tiles_coordination()
         self.generate_tiles_coordinates()
         self.state_game_over = False
@@ -248,6 +250,7 @@ class MainWidget(RelativeLayout):
                 self.current_offset_y -= spacing_y
                 self.current_y_loop += 1
                 self.generate_tiles_coordinates()
+                self.score_txt = "SCORE: " + str(self.current_y_loop)
 
             speed_x = self.current_speed_x * self.width / 100
             self.current_offset_x += speed_x * time_factor
