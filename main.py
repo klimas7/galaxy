@@ -21,14 +21,14 @@ class MainWidget(Widget):
     perspective_point_y = NumericProperty(0)
 
     V_NB_LINES = 8
-    V_LINES_SPACING = .2
+    V_LINES_SPACING = .4
     vertical_lines = []
 
     H_NB_LINES = 15
     H_LINES_SPACING = .1
     horizontal_lines = []
 
-    SPEED = 0.8
+    SPEED = 0.1
     current_offset_y = 0
     current_y_loop = 0
 
@@ -44,6 +44,7 @@ class MainWidget(Widget):
     SHIP_HEIGHT = 0.035
     SHIP_BASE_Y = 0.04
     ship = None
+    ship_coordinate = [(0, 0), (0, 0), (0, 0)]
 
     def __init__(self, **kwargs):
         super(MainWidget, self).__init__(**kwargs)
@@ -184,13 +185,34 @@ class MainWidget(Widget):
         base_y = self.SHIP_BASE_Y * self.height
         ship_width = (self.SHIP_WIDTH / 2) * self.width
 
-        tr_x_1, tr_y_1 = (self.perspective_point_x - ship_width, base_y)
-        tr_x_2, tr_y_2 = (self.perspective_point_x, base_y + self.SHIP_HEIGHT*self.height)
-        tr_x_3, tr_y_3 = (self.perspective_point_x + ship_width, base_y)
-        x1, y1 = self.transform(tr_x_1, tr_y_1)
-        x2, y2 = self.transform(tr_x_2, tr_y_2)
-        x3, y3 = self.transform(tr_x_3, tr_y_3)
+        self.ship_coordinate[0] = (self.perspective_point_x - ship_width, base_y)
+        self.ship_coordinate[1] = (self.perspective_point_x, base_y + self.SHIP_HEIGHT*self.height)
+        self.ship_coordinate[2] = (self.perspective_point_x + ship_width, base_y)
+
+        x1, y1 = self.transform(*self.ship_coordinate[0])
+        x2, y2 = self.transform(*self.ship_coordinate[1])
+        x3, y3 = self.transform(*self.ship_coordinate[2])
+
         self.ship.points = [x1, y1, x2, y2, x3, y3]
+
+    def check_ship_collision(self):
+        for i in range(len(self.tiles_coordinates)):
+            ti_x, ti_y = self.tiles_coordinates[i]
+
+            if ti_y > self.current_y_loop + 1:
+                return False
+            if self.check_ship_collision_with_tile(ti_x, ti_y):
+                return True
+        return False
+
+    def check_ship_collision_with_tile(self, ti_x, ti_y):
+        xmin, ymin = self.get_tile_coordinates(ti_x, ti_y)
+        xmax, ymax = self.get_tile_coordinates(ti_x + 1, ti_y + 1)
+        for i in range(0, 3):
+            px, py = self.ship_coordinate[i]
+            if xmin <= px <= xmax and ymin <= py <= ymax:
+                return True
+        return False
 
     def update(self, dt):
         time_factor = dt*60
@@ -209,6 +231,9 @@ class MainWidget(Widget):
 
         speed_x = self.current_speed_x * self.width / 100
         self.current_offset_x += speed_x * time_factor
+
+        if not self.check_ship_collision():
+            print("Game over")
 
 
 class GalaxyApp(App):
