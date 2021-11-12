@@ -5,7 +5,7 @@ Config.set('graphics', 'height', '400')
 from kivy import platform
 from kivy.core.window import Window
 from kivy.app import App
-from kivy.graphics import Line
+from kivy.graphics import Line, Quad
 from kivy.graphics.context_instructions import Color
 from kivy.properties import NumericProperty, Clock
 from kivy.uix.widget import Widget
@@ -33,10 +33,15 @@ class MainWidget(Widget):
     current_speed_x = 0
     current_offset_x = 0
 
+    tile = None
+    ti_x = 1
+    ti_y = 2
+
     def __init__(self, **kwargs):
         super(MainWidget, self).__init__(**kwargs)
         self.init_vertical_lines()
         self.init_horizontal_lines()
+        self.init_tiles()
 
         if self.is_desktop():
             self._keyboard = Window.request_keyboard(self.keyboard_closed, self)
@@ -61,6 +66,11 @@ class MainWidget(Widget):
             for i in range(0, self.H_NB_LINES):
                 self.horizontal_lines.append(Line())
 
+    def init_tiles(self):
+        with self.canvas:
+            Color(1, 1, 1)
+            self.tile = Quad()
+
     def get_line_x_from_index(self, index):
         center_line_x = self.perspective_point_x
         spacing = self.V_LINES_SPACING * self.width
@@ -71,6 +81,11 @@ class MainWidget(Widget):
     def get_line_y_from_index(self, index):
         spacing_y = self.H_LINES_SPACING * self.height
         return index * spacing_y - self.current_offset_y
+
+    def get_tile_coordinates(self, ti_x, ti_y):
+        x = self.get_line_x_from_index(ti_x)
+        y = self.get_line_y_from_index(ti_y)
+        return x, y
 
     def update_vertical_lines(self):
         begin_x_index = -int(self.V_NB_LINES/2) + 1
@@ -95,17 +110,29 @@ class MainWidget(Widget):
             x2, y2 = self.transform(xmax, line_y)
             self.horizontal_lines[i].points = [x1, y1, x2, y2]
 
+    def update_tiles(self):
+        xmin, ymin = self.get_tile_coordinates(self.ti_x, self.ti_y)
+        xmax, ymax = self.get_tile_coordinates(self.ti_x + 1, self.ti_y + 1)
+
+        x1, y1 = self.transform(xmin, ymin)
+        x2, y2 = self.transform(xmin, ymax)
+        x3, y3 = self.transform(xmax, ymax)
+        x4, y4 = self.transform(xmax, ymin)
+
+        self.tile.points = [x1, y1, x2, y2, x3, y3, x4, y4]
+
     def update(self, dt):
         time_factor = dt*60
         self.update_vertical_lines()
         self.update_horizontal_lines()
-        self.current_offset_y += self.SPEED * time_factor
+        self.update_tiles()
+        # self.current_offset_y += self.SPEED * time_factor
 
         spacing_y = self.H_LINES_SPACING * self.height
         if self.current_offset_y >= spacing_y:
             self.current_offset_y -= spacing_y
 
-        self.current_offset_x += self.current_speed_x * time_factor
+        # self.current_offset_x += self.current_speed_x * time_factor
 
 
 class GalaxyApp(App):
