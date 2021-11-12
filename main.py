@@ -34,15 +34,16 @@ class MainWidget(Widget):
     current_speed_x = 0
     current_offset_x = 0
 
-    tile = None
-    ti_x = 1
-    ti_y = 2
+    NB_TILES = 8
+    tiles = []
+    tiles_coordinates = []
 
     def __init__(self, **kwargs):
         super(MainWidget, self).__init__(**kwargs)
         self.init_vertical_lines()
         self.init_horizontal_lines()
         self.init_tiles()
+        self.generate_tiles_coordinates()
 
         if self.is_desktop():
             self._keyboard = Window.request_keyboard(self.keyboard_closed, self)
@@ -70,7 +71,12 @@ class MainWidget(Widget):
     def init_tiles(self):
         with self.canvas:
             Color(1, 1, 1)
-            self.tile = Quad()
+            for i in range(0, self.NB_TILES):
+                self.tiles.append(Quad())
+
+    def generate_tiles_coordinates(self):
+        for i in range(0, self.NB_TILES):
+            self.tiles_coordinates.append((0, i))
 
     def get_line_x_from_index(self, index):
         center_line_x = self.perspective_point_x
@@ -113,15 +119,17 @@ class MainWidget(Widget):
             self.horizontal_lines[i].points = [x1, y1, x2, y2]
 
     def update_tiles(self):
-        xmin, ymin = self.get_tile_coordinates(self.ti_x, self.ti_y)
-        xmax, ymax = self.get_tile_coordinates(self.ti_x + 1, self.ti_y + 1)
+        for i in range(0, self.NB_TILES):
+            ti_x, ti_y = self.tiles_coordinates[i]
+            xmin, ymin = self.get_tile_coordinates(ti_x, ti_y)
+            xmax, ymax = self.get_tile_coordinates(ti_x + 1, ti_y + 1)
 
-        x1, y1 = self.transform(xmin, ymin)
-        x2, y2 = self.transform(xmin, ymax)
-        x3, y3 = self.transform(xmax, ymax)
-        x4, y4 = self.transform(xmax, ymin)
+            x1, y1 = self.transform(xmin, ymin)
+            x2, y2 = self.transform(xmin, ymax)
+            x3, y3 = self.transform(xmax, ymax)
+            x4, y4 = self.transform(xmax, ymin)
 
-        self.tile.points = [x1, y1, x2, y2, x3, y3, x4, y4]
+            self.tiles[i].points = [x1, y1, x2, y2, x3, y3, x4, y4]
 
     def update(self, dt):
         time_factor = dt*60
